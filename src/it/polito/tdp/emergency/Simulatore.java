@@ -71,7 +71,12 @@ public class Simulatore {
 		}
 	}
 
+	/**
+	 * 
+	 * @param e
+	 */
 	private void processEvent(Event e) {
+		System.out.println(e+" queue "+queue.size()+", attesa "+attesa.size());
 		switch (e.getTipo()) {
 		case ARRIVA:
 			Event e2 = new Event(e.getOra().plusMinutes(DURATION_TRIAGE), EventType.TRIAGE, e.getPaziente());
@@ -101,7 +106,7 @@ public class Simulatore {
 			break;
 
 		case CHIAMATA:
-			attesa.remove(e.getPaziente());
+			//ERRORE CORRETTO -- non ci vuole: attesa.remove(e.getPaziente());
 			studi_occupati++;
 
 			switch (e.getPaziente().getStato()) {
@@ -127,10 +132,12 @@ public class Simulatore {
 
 			// Decidere chi deve essere chiamato (sulla base di colore e ora di arrivo)
 			// tra i pazienti attesa
-			Paziente paz = attesa.peek();
+			// ERRORE CORRETTO -- non usare attesa.peek() ma attesa.poll()
+			Paziente paz = attesa.poll();
 			if (paz != null) {
 				// Schedulare per ADESSO la CHIAMATA del paziente
 				queue.add(new Event(e.getOra(), EventType.CHIAMATA, paz));
+				System.out.println("Il prossimo è p"+paz.getId()+"-"+paz.getStato());
 			}
 
 			break;
@@ -164,8 +171,10 @@ public class Simulatore {
 
 		case POLLING:
 			if(studi_occupati<NS && !attesa.isEmpty()) {
-				Paziente paz2 = attesa.peek();
+				// ERRORE CORRETTO -- non usare attesa.peek() ma attesa.poll()
+				Paziente paz2 = attesa.poll();
 				queue.add(new Event(e.getOra(), EventType.CHIAMATA, paz2));
+				System.out.println("Chiamo p"+paz2.getId()+"-"+paz2.getStato());
 			}
 			queue.add(new Event(e.getOra().plusMinutes(T_POLLING),
 					EventType.POLLING, null));
